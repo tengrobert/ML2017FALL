@@ -17,6 +17,7 @@ from keras.callbacks import EarlyStopping
 from keras.callbacks import ModelCheckpoint
 from keras.utils import to_categorical
 from keras.utils import np_utils
+from keras.utils import plot_model
 from keras.constraints import maxnorm
 from keras.optimizers import SGD
 from sklearn.model_selection import train_test_split
@@ -36,7 +37,7 @@ def read_data(filename, label=True, width=48, height=48):
         else:
             return X
 
-X, Y = read_data('./train.csv')
+X, Y = read_data('../../train拷貝.csv')
 
 seed = 7
 test_size = 0.33
@@ -62,73 +63,74 @@ datagen = ImageDataGenerator(
 )
 model = Sequential()
 
-model.add(Conv2D(64, kernel_size=(5, 5), input_shape=input_shape, padding='same', kernel_initializer='glorot_normal'))
-model.add(LeakyReLU(alpha=1./20))
-model.add(BatchNormalization())
+#model.add(Conv2D(64, kernel_size=(5, 5), input_shape=input_shape, padding='same', kernel_initializer='glorot_normal'))
+#model.add(LeakyReLU(alpha=1./20))
+#model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2, 2), padding='same'))
 model.add(Dropout(0.25))
 
-# model.add(Conv2D(128, kernel_size=(3, 3), padding='same', kernel_initializer='glorot_normal'))
-# model.add(LeakyReLU(alpha=1./20))
-# model.add(BatchNormalization())
-# model.add(MaxPooling2D(pool_size=(2, 2), padding='same'))
-# model.add(Dropout(0.3))
+#model.add(Conv2D(128, kernel_size=(3, 3), padding='same', kernel_initializer='glorot_normal'))
+#model.add(LeakyReLU(alpha=1./20))
+#model.add(BatchNormalization())
+model.add(MaxPooling2D(pool_size=(2, 2), padding='same'))
+model.add(Dropout(0.3))
 
-# model.add(Conv2D(512, kernel_size=(3, 3), padding='same', kernel_initializer='glorot_normal'))
-# model.add(LeakyReLU(alpha=1./20))
-# model.add(BatchNormalization())
-# model.add(MaxPooling2D(pool_size=(2, 2), padding='same'))
-# model.add(Dropout(0.35))
+#model.add(Conv2D(512, kernel_size=(3, 3), padding='same', kernel_initializer='glorot_normal'))
+#model.add(LeakyReLU(alpha=1./20))
+#model.add(BatchNormalization())
+model.add(MaxPooling2D(pool_size=(2, 2), padding='same'))
+model.add(Dropout(0.35))
 
-# model.add(Conv2D(512, kernel_size=(3, 3), padding='same', kernel_initializer='glorot_normal'))
-# model.add(LeakyReLU(alpha=1./20))
-# model.add(BatchNormalization())
-# model.add(MaxPooling2D(pool_size=(2, 2), padding='same'))
-# model.add(Dropout(0.4))
+#model.add(Conv2D(512, kernel_size=(3, 3), padding='same', kernel_initializer='glorot_normal'))
+#model.add(LeakyReLU(alpha=1./20))
+#model.add(BatchNormalization())
+model.add(MaxPooling2D(pool_size=(2, 2), padding='same'))
+model.add(Dropout(0.4))
 
 model.add(Flatten())
-# model.add(Dense(512, activation='relu', kernel_initializer='glorot_normal'))
-# model.add(BatchNormalization())
-# model.add(Dropout(0.5))
+model.add(Dense(512, activation='relu', kernel_initializer='glorot_normal'))
+#model.add(BatchNormalization())
+model.add(Dropout(0.5))
 
 model.add(Dense(512, activation='relu', kernel_initializer='glorot_normal'))
-model.add(BatchNormalization())
+#model.add(BatchNormalization())
 model.add(Dropout(0.5))
 
 model.add(Dense(num_classes, activation='softmax', kernel_initializer='glorot_normal'))
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 model.summary()
+plot_model(model,to_file='model1.png')
 
-callbacks = []
-callbacks.append(ModelCheckpoint('teng/model-{epoch:05d}-{val_acc:.5f}.h5', monitor='val_acc', save_best_only=True, period=1))
+# callbacks = []
+# callbacks.append(ModelCheckpoint('teng/model-{epoch:05d}-{val_acc:.5f}.h5', monitor='val_acc', save_best_only=True, period=1))
     
-model.fit_generator(
-        datagen.flow(X_train, y_train, batch_size=batch_size), 
-        steps_per_epoch=5*len(X_train)//batch_size,
-        epochs=epochs,
-        validation_data=(X_test, y_test)
-)
-model.save('my_model.h5')
+# model.fit_generator(
+#         datagen.flow(X_train, y_train, batch_size=batch_size), 
+#         steps_per_epoch=5*len(X_train)//batch_size,
+#         epochs=epochs,
+#         validation_data=(X_test, y_test)
+# )
+# model.save('my_model.h5')
 
-# Compile model
-# epochs = 25
-# lrate = 0.01
-# decay = lrate/epochs
-# sgd = SGD(lr=lrate, momentum=0.9, decay=decay, nesterov=False)
-# model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+# # Compile model
+# # epochs = 25
+# # lrate = 0.01
+# # decay = lrate/epochs
+# # sgd = SGD(lr=lrate, momentum=0.9, decay=decay, nesterov=False)
+# # model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
 
-# Fit the model
-model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=epochs, batch_size=32)
-# Final evaluation of the model
-scores = model.evaluate(X_test, y_test, verbose=0)
-print("Accuracy: %.2f%%" % (scores[1]*100))
+# # Fit the model
+# model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=epochs, batch_size=32)
+# # Final evaluation of the model
+# scores = model.evaluate(X_test, y_test, verbose=0)
+# print("Accuracy: %.2f%%" % (scores[1]*100))
 
-test = read_data('./test.csv', label=False)
-y_pred = model.predict(test)
-y_pred = np.argmax(y_pred, axis=1)
-print(y_pred)
-output = pd.DataFrame(y_pred)
-output.columns = ['label']
-output.index = [list(range(0, 7178))]
-output.index.name = 'id'
-output.to_csv('./output.csv')
+# test = read_data('./test.csv', label=False)
+# y_pred = model.predict(test)
+# y_pred = np.argmax(y_pred, axis=1)
+# print(y_pred)
+# output = pd.DataFrame(y_pred)
+# output.columns = ['label']
+# output.index = [list(range(0, 7178))]
+# output.index.name = 'id'
+# output.to_csv('./output.csv')
