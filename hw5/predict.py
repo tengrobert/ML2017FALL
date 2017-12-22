@@ -6,7 +6,6 @@ import sys
 model = load_model('mfta-05-0.6228.h5')
 
 test = pd.read_csv(sys.argv[1])
-train = pd.read_csv('train.csv')
 mean = 3.58
 std = 1.11
 y = model.predict([test['UserID'], test['MovieID']])
