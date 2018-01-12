@@ -41,14 +41,19 @@ def reconstruct_face(X, size=(64, 64), top=4):
     weights = np.dot(X_center, U)
 
     target = io.imread(os.path.join(sys.argv[1], sys.argv[2]))
+    target = target.flatten()
     target = target - mean
 
+    weights2 = np.dot(target, U[:, :top].T)
+    pic = np.dot(weights2, U[:, :top].T)
+    pic += mean
 
-    recon = mean + np.dot(weights[4, :top], U[:, :top].T)
-    recon = recon.reshape(size)
+    recon = pic
     recon -= np.min(recon)
     recon /= np.max(recon)
     recon = (recon*255).astype(np.uint8)
-    io.imsave('reconstruction.jpg', recon) 
+    io.imsave('reconstruction.jpg', recon.reshape(size)) 
 
 X, size = read_data(sys.argv[1])
+
+reconstruct_face(X, size, 4)
